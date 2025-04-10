@@ -1,0 +1,51 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Results</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .results {
+            margin-top: 20px;
+        }
+        .book {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Search Results</h1>
+    <div class="results" id="results"></div>
+
+    <script>
+        // Extract query parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const searchType = urlParams.get('searchType');
+        const category = urlParams.get('category');
+        const query = urlParams.get('query');
+
+        document.getElementById("results").innerHTML = `
+            <h3>Showing results for: ${query} (${searchType}, ${category})</h3>
+            <p>Here, you would fetch data from the database based on the search query.</p>
+        `;
+
+        // Fetch results from a backend (optional)
+        // fetch(`search.php?searchType=${searchType}&category=${category}&query=${query}`)
+        //     .then(response => response.json())
+        //     .then(data => {
+        //         let resultsHTML = "";
+        //         data.forEach(book => {
+        //             resultsHTML += `<div class="book"><h4>${book.title}</h4><p>${book.author}</p></div>`;
+        //         });
+        //         document.getElementById("results").innerHTML += resultsHTML;
+        //     });
+    </script>
+</body>
+</html>
