@@ -26,15 +26,6 @@
             padding: 30px;
             position: relative;
         }
-        .search-bar {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-        }
-        .search-bar select, .search-bar input, .search-bar button {
-            margin-left: 5px;
-            padding: 5px;
-        }
         .nav {
             background-color: #333;
             color: #fff;
@@ -68,6 +59,7 @@
         .sidebar {
             flex: 1;
             background-color: #f4f4f4;
+            color: black;
             padding: 20px;
         }
         .footer {
@@ -90,7 +82,7 @@
             <select name="category">
                 <option value="all">All Categories</option>
                 <option value="fiction">Fiction</option>
-                <option value="nonfiction">Non-fiction</option>
+                <option value="non-fiction">Non-fiction</option>
                 <option value="educational">Educational</option>
             </select>
             <input type="text" id="searchInput" name="title" placeholder="Search by title...">
@@ -99,10 +91,17 @@
     </div>
 
     <div class="nav">
-        <h2>Navigation</h2>
         <a href="#">Home</a>
-        <a href="#">Browse Books</a>
-        <a href="#">Categories</a>
+        <a href="#" onclick="browseAllBooks()">Browse Books</a>
+        <div style="display: inline-block; position: relative;">
+            <a href="#">Categories</a>
+            <select onchange="filterByCategory(this.value)" style="position: absolute; left: 0; opacity: 0; width: 100%; height: 100%;">
+                <option disabled selected>Choose</option>
+                <option value="fiction">Fiction</option>
+                <option value="non-fiction">Non-fiction</option>
+                <option value="educational">Educational</option>
+            </select>
+        </div>
         <a href="#">Contact</a>
     </div>
 
@@ -113,13 +112,8 @@
 
             <div class="book-recommendations">
                 <h3>Books You May Be Interested In:</h3>
-                <div class="book">
-                    <h4>Programming I</h4>
-                    <p>By Some Guy - Learn the basics of programming through projects and examples</p>
-                </div>
-                <div class="book">
-                    <h4>Brave New World</h4>
-                    <p>By Aldous Huxley - A futuristic society driven by technology and control.</p>
+                <div id="recommendedBooks">
+                    <p>Start browsing to see personalized recommendations.</p>
                 </div>
             </div>
         </div>
@@ -138,8 +132,8 @@
 
     <div class="footer">
         <h3>Footer Information</h3>
-    &copy; 2025 Bookstore. All Rights Reserved. |
-    <a href="dev.html" style="color: lightgreen; text-decoration: underline;">Developer Page</a>
+        &copy; 2025 Bookstore. All Rights Reserved. |
+        <a href="dev.html" style="color: lightgreen; text-decoration: underline;">Developer Page</a>
     </div>
 
     <script>
@@ -155,6 +149,15 @@
             } else if (selectedType === "author") {
                 input.setAttribute("name", "author");
             }
+
+            // Store search in localStorage for recommendations
+            const val = input.value;
+            if (val) {
+                let history = JSON.parse(localStorage.getItem("bookstore_history") || "[]");
+                history.unshift(val);
+                history = [...new Set(history)].slice(0, 5);
+                localStorage.setItem("bookstore_history", JSON.stringify(history));
+            }
         }
 
         function updatePlaceholder() {
@@ -162,6 +165,49 @@
             const input = document.getElementById("searchInput");
             input.placeholder = "Search by " + selectedType.replace("_", " ");
         }
+
+        function browseAllBooks() {
+            const form = document.createElement("form");
+            form.method = "POST";
+            form.action = "bookstore";
+            document.body.appendChild(form);
+            form.submit();
+        }
+
+        function filterByCategory(category) {
+            const form = document.createElement("form");
+            form.method = "POST";
+            form.action = "bookstore";
+
+            const categoryInput = document.createElement("input");
+            categoryInput.type = "hidden";
+            categoryInput.name = "category";
+            categoryInput.value = category;
+
+            form.appendChild(categoryInput);
+            document.body.appendChild(form);
+            form.submit();
+        }
+
+        function displayRecommendations() {
+            const history = JSON.parse(localStorage.getItem("bookstore_history") || "[]");
+            const container = document.getElementById("recommendedBooks");
+
+            if (history.length === 0) {
+                container.innerHTML = "<p>No past searches yet. Try searching to get recommendations.</p>";
+                return;
+            }
+
+            container.innerHTML = "";
+            history.forEach(term => {
+                const bookDiv = document.createElement("div");
+                bookDiv.classList.add("book");
+                bookDiv.innerHTML = `<h4>Suggested: ${term}</h4><p><a href="bookstore?title=${encodeURIComponent(term)}">Search this title</a></p>`;
+                container.appendChild(bookDiv);
+            });
+        }
+
+        displayRecommendations();
     </script>
 </body>
 </html>
