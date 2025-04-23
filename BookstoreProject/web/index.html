@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bookstore</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      color: white;
+      text-shadow: 2px 2px 4px black;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      background-image: url('images/Bookstore.jpg');
+      background-attachment: fixed;
+      background-repeat: no-repeat;
+      background-size: cover;
+    }
+    .header {
+      background-color: #4CAF50;
+      color: black;
+      text-align: center;
+      padding: 30px;
+      position: relative;
+    }
+    .nav {
+      background-color: #333;
+      color: #fff;
+      padding: 10px;
+      text-align: center;
+    }
+    .nav a {
+      color: #fff;
+      margin: 0 15px;
+      text-decoration: none;
+    }
+    .content {
+      display: flex;
+      flex: 1;
+    }
+    .article {
+      flex: 3;
+      padding: 20px;
+    }
+    .book-recommendations {
+      margin-top: 20px;
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 15px;
+      border-radius: 8px;
+    }
+    .book-recommendations .book {
+      border: 1px solid #fff;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+    .sidebar {
+      flex: 1;
+      background-color: #f4f4f4;
+      color: black;
+      padding: 20px;
+    }
+    .footer {
+      background-color: #222;
+      color: #fff;
+      text-align: center;
+      padding: 10px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Bookstore</h1>
+    <form action="bookstore" method="post" onsubmit="storeSearchCategory(); setSearchInputName()">
+      <select name="searchType" id="searchType" onchange="updatePlaceholder()">
+        <option value="book_id">Book ID</option>
+        <option value="title" selected>Title</option>
+        <option value="author">Author</option>
+      </select>
+      <select name="category" id="categorySelect">
+        <option value="all">All Categories</option>
+        <option value="fiction">Fiction</option>
+        <option value="non-fiction">Non-fiction</option>
+        <option value="educational">Educational</option>
+      </select>
+      <input type="text" id="searchInput" name="title" placeholder="Search by title..." />
+      <button type="submit">Search</button>
+    </form>
+  </div>
+
+  <div class="nav">
+    <a href="#">Home</a>
+    <a href="#" onclick="browseAllBooks()">Browse Books</a>
+    <div style="display: inline-block; position: relative;">
+      <a href="#">Categories</a>
+      <select onchange="filterByCategory(this.value)" style="position: absolute; left: 0; opacity: 0; width: 100%; height: 100%;">
+        <option disabled selected>Choose</option>
+        <option value="fiction">Fiction</option>
+        <option value="non-fiction">Non-fiction</option>
+        <option value="educational">Educational</option>
+      </select>
+    </div>
+    <a href="bookstore?action=aggregate">📊 View Aggregate</a>
+    <a href="#">Contact</a>
+  </div>
+
+  <div class="content">
+    <div class="article">
+      <h2>Article Section</h2>
+      <p>Discover a variety of books. If you're a student, don't forget our educational section!</p>
+
+      <div class="book-recommendations">
+        <h3>Books You May Be Interested In:</h3>
+        <div id="recommendedBooks">
+          <p>Start browsing to see personalized recommendations.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar">
+      <h3>Newest Novels Submitted</h3>
+      <ul>
+        <li>The Silent Patient</li>
+        <li>Where the Crawdads Sing</li>
+        <li>The Night Watchman</li>
+        <li>The Paper Palace</li>
+        <li>The Lincoln Highway</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="footer">
+    <h3>Footer Information</h3>
+    &copy; 2025 Bookstore. All Rights Reserved. |
+    <a href="dev.html" style="color: lightgreen; text-decoration: underline;">Developer Page</a>
+  </div>
+
+  <script>
+    function updatePlaceholder() {
+      const selectedType = document.getElementById("searchType").value;
+      const input = document.getElementById("searchInput");
+      input.placeholder = "Search by " + selectedType.replace("_", " ");
+    }
+
+    function setSearchInputName() {
+      const selectedType = document.getElementById("searchType").value;
+      const input = document.getElementById("searchInput");
+      input.removeAttribute("name");
+
+      if (selectedType === "book_id") input.setAttribute("name", "book_id");
+      else if (selectedType === "title") input.setAttribute("name", "title");
+      else if (selectedType === "author") input.setAttribute("name", "author");
+    }
+
+    function storeSearchCategory() {
+      const category = document.getElementById("categorySelect").value;
+      if (category && category !== "all") {
+        localStorage.setItem("lastSearchCategory", category);
+      }
+    }
+
+    function browseAllBooks() {
+      const form = document.createElement("form");
+      form.method = "POST";
+      form.action = "bookstore";
+      document.body.appendChild(form);
+      form.submit();
+    }
+
+    function filterByCategory(category) {
+      const form = document.createElement("form");
+      form.method = "POST";
+      form.action = "bookstore";
+      const input = document.createElement("input");
+      input.type = "hidden";
+      input.name = "category";
+      input.value = category;
+      form.appendChild(input);
+      document.body.appendChild(form);
+      form.submit();
+    }
+
+    async function loadRecommendations() {
+      const container = document.getElementById("recommendedBooks");
+      const category = localStorage.getItem("lastSearchCategory");
+      if (!category) {
+        container.innerHTML = "<p>No recommendations yet. Try searching by category.</p>";
+        return;
+      }
+
+      try {
+        const res = await fetch(`bookstore?action=recommend&category=${encodeURIComponent(category)}`);
+        const data = await res.json();
+
+        if (!data.length) {
+          container.innerHTML = "<p>No recommendations found in that category.</p>";
+          return;
+        }
+
+        container.innerHTML = "";
+        data.forEach(book => {
+          const div = document.createElement("div");
+          div.className = "book";
+          div.innerHTML = `<h4>${book.title}</h4><p>By ${book.author}</p><p><i>${book.category}</i></p>`;
+          container.appendChild(div);
+        });
+      } catch (err) {
+        container.innerHTML = "<p>Error loading recommendations.</p>";
+      }
+    }
+
+    loadRecommendations();
+  </script>
+</body>
+</html>
+
+
+
+

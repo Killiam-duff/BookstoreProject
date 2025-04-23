@@ -1,0 +1,40 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Developer Page</title>
+</head>
+<body>
+    <h1>Developer Controls</h1>
+
+    <h3>Add Book</h3>
+    <form action="bookstore" method="post">
+        <input type="hidden" name="action" value="insert">
+        ID: <input type="number" name="book_id" required><br>
+        Title: <input type="text" name="title" required><br>
+        Author ID: <input type="number" name="author_id" required><br>
+        Author Name: <input type="text" name="author_name"><br>
+        Category ID: <input type="number" name="category_id" required><br>
+        <button type="submit">Add Book</button>
+    </form>
+
+    <h3>Update Book</h3>
+    <form action="bookstore" method="post">
+        <input type="hidden" name="action" value="update">
+        ID: <input type="number" name="book_id" required><br>
+        Title: <input type="text" name="title" required><br>
+        Author ID: <input type="number" name="author_id" required><br>
+        Author Name: <input type="text" name="author_name"><br>
+        Category ID: <input type="number" name="category_id" required><br>
+        <button type="submit">Update Book</button>
+    </form>
+
+    <h3>Delete Book</h3>
+    <form action="bookstore" method="post">
+        <input type="hidden" name="action" value="delete">
+        ID: <input type="number" name="book_id" required><br>
+        <button type="submit">Delete Book</button>
+    </form>
+</body>
+</html>
